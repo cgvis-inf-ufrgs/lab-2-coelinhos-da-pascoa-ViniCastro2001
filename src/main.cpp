@@ -6,7 +6,7 @@
 //               Prof. Eduardo Gastal
 //
 //                   LABORATÓRIO 2
-//
+//a
 
 // Arquivos "headers" padrões de C podem ser incluídos em um
 // programa C++, sendo necessário somente adicionar o caractere
