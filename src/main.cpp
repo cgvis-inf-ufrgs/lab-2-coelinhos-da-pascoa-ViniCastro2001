@@ -192,7 +192,7 @@ bool g_MiddleMouseButtonPressed = false; // Análogo para botão do meio do mous
 // renderização.
 float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.3f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 3.5f; // Distância da câmera para a origem
+float g_CameraDistance = 15.0f; // Distância da câmera para a origem
 
 // Variáveis que controlam rotação do antebraço
 float g_ForearmAngleZ = 0.0f;
@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        float farplane  = -30.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -395,28 +395,86 @@ int main(int argc, char* argv[])
         // efetivamente aplicadas em todos os pontos.
         glUniformMatrix4fv(g_view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(g_projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
+        
 
         #define SPHERE 0
         #define BUNNY  1
         #define PLANE  2
 
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, SPHERE);
-        DrawVirtualObject("the_sphere");
 
-        // Desenhamos o modelo do coelho
-        model = Matrix_Translate(1.0f,0.0f,0.0f);
-        glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(g_object_id_uniform, BUNNY);
-        DrawVirtualObject("the_bunny");
+        float angle;
 
         // Desenhamos o plano do chão
-        model = Matrix_Translate(0.0f,-1.0f,0.0f) * Matrix_Scale(4.0f,1.0f,4.0f);
+        model = Matrix_Translate(0.0f,-1.0f,0.0f) * Matrix_Scale(10.0f,1.0f,10.0f);
         glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(g_object_id_uniform, PLANE);
         DrawVirtualObject("the_plane");
+
+        
+        glm::mat4 bunny_movement;
+
+        glm::mat4 bunny_rotation;
+        glm::mat4 gira_em_volta_raiz;
+
+        glm::mat4 bunny_egg;
+        glm::mat4 bunny_egg_2;
+
+        glm::mat4 bunny_self_spin;
+
+        int num_bunnies = 16;
+
+        for (int i = 1; i < num_bunnies; i++)
+        {
+            angle = glfwGetTime() + i;
+            bunny_movement = Matrix_Rotate_Y(angle/2.4) * Matrix_Translate(7.0f,2.0f + 2*cos(angle*2.5f),0.0f);
+
+            bunny_rotation = Matrix_Rotate_Y(angle);
+            gira_em_volta_raiz = Matrix_Rotate_Y(angle) * Matrix_Translate(3.0f,0.0f,0.0f);
+
+            bunny_egg = bunny_movement *
+            Matrix_Rotate_Y(180) *
+            Matrix_Rotate_X(2*angle) *
+            Matrix_Translate(0.0f, 0.0f, -1.5f) *
+            Matrix_Rotate_X(-2*angle) *
+            Matrix_Scale(0.25f, 0.35f, 0.25f);
+
+            bunny_egg_2 = bunny_movement *
+            Matrix_Rotate_Y(180) *
+            Matrix_Rotate_X(2*angle) *
+            Matrix_Translate(0.0f, 0.0f, 1.5f) *
+            Matrix_Rotate_X(-2*angle) *
+            Matrix_Scale(0.25f, 0.35f, 0.25f);
+            
+            // Coelhos bobos (giram no próprio eixo)
+            if (i % 4 == 0)
+            {
+                bunny_self_spin = Matrix_Rotate_X(-2.0f * angle);
+            }
+            else
+            {
+                bunny_self_spin = Matrix_Identity();
+            }
+
+            // Coelho que gira
+            model = bunny_movement * bunny_self_spin * Matrix_Rotate_Y(-90);
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, BUNNY);
+            DrawVirtualObject("the_bunny");
+
+            // Ovo que gira em volta do coelho
+            model = bunny_egg;
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+
+
+            // Ovo que gira em volta do coelho
+            model = bunny_egg_2;
+            glUniformMatrix4fv(g_model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(g_object_id_uniform, SPHERE);
+            DrawVirtualObject("the_sphere");
+        }
+
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
