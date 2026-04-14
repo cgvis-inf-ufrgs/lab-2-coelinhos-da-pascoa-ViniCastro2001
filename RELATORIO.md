@@ -49,7 +49,7 @@
 
 A maior dificuldade foi entender a ordem de multiplicação das matrizes e como afeta o resultado, já que não pareceu muito intuitivo a princípio. Isso causou vários resultados inesperados e até mesmo engraçados.
 
-Também houve confusão entre rotação de órbita e rotação do próprio objeto, além da escolha correta dos eixos.
+Também houve confusão entre rotação de órbita, rotação do próprio objeto e da escolha correta dos eixos.
 
 No geral, o entendimento veio principalmente através de testes e ajustes incrementais.
 
